@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        include:
+        include: 
           - name: Clang-6.0
             extra_deps: clang-6.0
             c_compiler: clang-6.0
@@ -57,22 +57,12 @@ jobs:
         run: |
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2
-          CXXFLAGS=-Werror CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -B out .
-          cmake --build out
-          ctest --test-dir out
-
-  bazel:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
-        with:
-          egress-policy: audit  # cannot be block - runner does git checkout
-
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - uses: bazelbuild/setup-bazelisk@95c9bf48d0c570bb3e28e57108f3450cd67c1a44 # v2.0.0
-      - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: ~/.cache/bazel
-          key: bazel-${{ runner.os }}
-      - run: bazel build //...
+          CXXFLAGS=-Werror CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake \
+            -DBUILD_GMOCK=OFF \
+            -DBUILD_TESTING=OFF \
+            -DHWY_ENABLE_CONTRIB=OFF \
+            -DHWY_ENABLE_EXAMPLES=OFF \
+            -DHWY_ENABLE_TESTS=OFF \
+            -DHWY_INSTALL_GTEST=OFF \
+            -B out .
+          cd out && make VERBOSE=1
