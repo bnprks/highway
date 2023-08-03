@@ -17,10 +17,12 @@ name: Build / test
 on: [push, pull_request]
 jobs:
   cmake:
-    name: Build and test ${{ matrix.name }}
-    runs-on: ubuntu-20.04
+    name: Build and test ${{ matrix.name }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-22.04, windows-2022, macos-12]
+        name: [Clang-6.0, Clang-10, Clang-12, GCC-10]
         include: 
           - name: Clang-6.0
             extra_deps: clang-6.0
@@ -50,8 +52,10 @@ jobs:
 
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-      - name: Install deps
-        run: sudo apt-get install ${{ matrix.extra_deps }}
+      - name: Install compiler
+        uses: rlalik/setup-cpp-compiler@v1.2
+        with:
+          compiler: ${{ matrix.extra_deps }}
 
       - name: Build and test
         run: |
